@@ -13,20 +13,20 @@ class DentalDataset(Dataset):
 
     def __init__(self, path, transform):
         super().__init__()
-
         self.transform = transform
 
-        img_folder = os.path.join(path, 'img')
-        mask_folder = os.path.join(path, 'mask')
+        img_folder = os.path.join(path, 'images')
+        mask_folder = os.path.join(path, 'infection masks')
 
         self.img_paths = []
         self.mask_paths = []
         for p in os.listdir(img_folder):
-            name = p.split('.')[0]
+            if p.startswith('covid_') :
+                name = p.split('.')[0]
+                self.img_paths.append(os.path.join(img_folder, name + '.png'))
+                self.mask_paths.append(os.path.join(mask_folder, name + '.png'))
 
-            self.img_paths.append(os.path.join(img_folder, name + '.jpg'))
-            self.mask_paths.append(os.path.join(mask_folder, name + '.bmp'))
-
+        print(self.img_paths)
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -65,15 +65,10 @@ class DentalDataset(Dataset):
 
 if __name__ == '__main__':
     import torchvision.transforms as transforms
-    from utils import transforms as T
+    import transforms as T
+    transform = transforms.Compose([T.RandomAugmentation(2)])
 
-    transform = transforms.Compose([T.BGR2RGB(),
-                                    T.Rescale(cfg.input_size),
-                                    T.RandomAugmentation(2),
-                                    T.Normalize(),
-                                    T.ToTensor()])
-
-    md = DentalDataset('/home/kara/Downloads/UFBA_UESC_DENTAL_IMAGES_DEEP/dataset_and_code/test/set/train',
+    md = DentalDataset('F:/UNIVERCITY/sharifian/t2/dataset/COVID-QU-Ex Dataset/Infection Segmentation Data/Infection Segmentation Data/Train/COVID-19',
                        transform)
 
     for sample in md:
