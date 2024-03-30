@@ -2,7 +2,7 @@ from tqdm import tqdm
 import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader
-
+import os
 # Additional Scripts
 from utils import transforms as T
 from utils.dataset import DentalDataset
@@ -11,6 +11,7 @@ from utils.utils import EpochCallback
 from config import cfg
 
 from train_transunet import TransUNetSeg
+import matplotlib.pyplot as plt
 
 
 class TrainTestPipe:
@@ -53,6 +54,23 @@ class TrainTestPipe:
         return total_loss
 
     def train(self):
+        # Load pre-trained model weights before starting training
+        if os.path.exists(self.model_path):
+            self.transunet.load_model(self.model_path)  
+
+        # Freeze the weights of the earlier layers, if desired
+        for param in self.transunet.model.parameters():
+            param.requires_grad = True
+        # for param in self.transunet.model.fc.parameters():
+        #     param.requires_grad = True    
+
+        # num_features = self.transunet.model.fc.in_features
+        # self.transunet.model.fc = nn.Linear(num_features, cfg.transunet.class_num)
+
+
+        train_loss_plot = []
+        test_loss_plot = []
+        
         callback = EpochCallback(self.model_path, cfg.epoch,
                                  self.transunet.model, self.transunet.optimizer, 'test_loss', cfg.patience)
 
@@ -66,5 +84,29 @@ class TrainTestPipe:
                                {'loss': train_loss / len(self.train_loader),
                                 'test_loss': test_loss / len(self.test_loader)})
 
+            train_loss_plot.append(train_loss / len(self.train_loader))
+            test_loss_plot.append(test_loss / len(self.test_loader))
+
+            # Plot the training and testing losses
+            plt.figure()  # Create a new figure to avoid overlap
+            plt.plot(train_loss_plot, label='Train Loss')
+            plt.plot(test_loss_plot, label='Test Loss')
+            plt.xlabel('Epochs')
+            plt.ylabel('Loss')
+            plt.legend()
+    
+            # Save the plot to the same file, overwriting the previous plot
+            plt.savefig('F:/UNIVERCITY/sharifian/t1/aproches/7/plot7.png')
+            plt.close()  # Close the figure to free memory      
+
+
             if callback.end_training:
                 break
+
+        #plot the train loss and test loss
+        plt.plot(train_loss_plot, label=' Loss')
+        plt.plot(test_loss_plot, label='test Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
