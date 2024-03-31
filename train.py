@@ -96,7 +96,7 @@ class TrainTestPipe:
             plt.legend()
     
             # Save the plot to the same file, overwriting the previous plot
-            plt.savefig('F:/UNIVERCITY/sharifian/t1/aproches/7/plot7.png')
+            plt.savefig('/content/drive/MyDrive/covid/colab/plot/plot1.png')
             plt.close()  # Close the figure to free memory      
 
 

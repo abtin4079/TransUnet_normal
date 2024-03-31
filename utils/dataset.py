@@ -15,18 +15,18 @@ class DentalDataset(Dataset):
         super().__init__()
         self.transform = transform
 
-        img_folder = os.path.join(path, 'images')
-        mask_folder = os.path.join(path, 'infection masks')
+        img_folder = os.path.join(path, 'img')
+        mask_folder = os.path.join(path, 'mask')
 
         self.img_paths = []
         self.mask_paths = []
         for p in os.listdir(img_folder):
-            if p.startswith('covid_') :
-                name = p.split('.')[0]
-                self.img_paths.append(os.path.join(img_folder, name + '.png'))
-                self.mask_paths.append(os.path.join(mask_folder, name + '.png'))
+            #if p.startswith('covid_') :
+            name = p.split('.')[0]
+            self.img_paths.append(os.path.join(img_folder, name + '.png'))
+            self.mask_paths.append(os.path.join(mask_folder, name + '.png'))
 
-        print(self.img_paths)
+
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
