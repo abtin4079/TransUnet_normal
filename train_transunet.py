@@ -39,7 +39,28 @@ class TransUNetSeg:
         loss.backward()
         self.optimizer.step()
 
-        return loss.item(), pred_mask
+        # Compute accuracy
+        accuracy = self.pixelwise_accuracy(pred_mask, params['mask'])
+
+
+        return loss.item(), pred_mask, accuracy
+
+    def pixelwise_accuracy(self, pred_mask, true_mask):
+        # Flatten predicted and true masks
+        pred_flat = pred_mask.view(-1)
+        true_flat = true_mask.view(-1)
+
+        # Compute accuracy
+        correct = (pred_flat == true_flat).float().sum()
+        total_pixels = true_flat.numel()
+        accuracy = correct / total_pixels
+
+        return accuracy.item()   
+
+
+
+
+
 
     def test_step(self, **params):
         self.model.eval()
