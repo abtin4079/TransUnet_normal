@@ -67,5 +67,8 @@ class TransUNetSeg:
 
         pred_mask = self.model(params['img'])
         loss = self.criterion(pred_mask, params['mask'])
+        
 
-        return loss.item(), pred_mask
+        accuracy = self.pixelwise_accuracy(pred_mask, params['mask'])
+
+        return loss.item(), pred_mask , accuracy

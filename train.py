@@ -77,14 +77,15 @@ class TrainTestPipe:
 
         for epoch in range(cfg.epoch):
             with tqdm(total=len(self.train_loader) + len(self.test_loader)) as t:
-                train_loss , accuracy = self.__loop(self.train_loader, self.transunet.train_step, t)
+                train_loss , accuracy_train = self.__loop(self.train_loader, self.transunet.train_step, t)
 
-                test_loss = self.__loop(self.test_loader, self.transunet.test_step, t)
+                test_loss, accuracy_test = self.__loop(self.test_loader, self.transunet.test_step, t)
 
             callback.epoch_end(epoch + 1,
                                {'loss': train_loss / len(self.train_loader),
                                 'test_loss': test_loss / len(self.test_loader), 
-                                "accuray: ": accuracy})
+                                "accuracy_train: ": accuracy_train, 
+                                "accuracy_test: ": accuracy_test})
 
             train_loss_plot.append(train_loss / len(self.train_loader))
             test_loss_plot.append(test_loss / len(self.test_loader))
