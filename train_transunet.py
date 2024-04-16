@@ -72,6 +72,7 @@ class TransUNetSeg:
         pred_mask = self.model(params['img'])
         loss = self.criterion(pred_mask, params['mask'])
         
+        a = 0
 
 
-        return loss.item(), pred_mask
+        return loss.item(), pred_mask , a
