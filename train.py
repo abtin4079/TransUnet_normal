@@ -82,15 +82,15 @@ class TrainTestPipe:
                 test_loss = self.__loop(self.test_loader, self.transunet.test_step, t)
 
             callback.epoch_end(epoch + 1,
-                               {'loss': train_loss / len(self.train_loader),
+                               {'train_loss': train_loss / len(self.train_loader),
                                 'test_loss': test_loss[0] / len(self.test_loader), 
                                 "IOU: ": metrics[0], 
                                 "DSC: ": metrics[1],
                                 "accuracy: ": metrics[2],
                                 "F1-score: ": metrics[3]})
 
-            train_loss_plot.append(train_loss[0] / len(self.train_loader))
-            test_loss_plot.append(test_loss / len(self.test_loader))
+            train_loss_plot.append(train_loss / len(self.train_loader))
+            test_loss_plot.append(test_loss[0] / len(self.test_loader))
 
             # Plot the training and testing losses
             plt.figure()  # Create a new figure to avoid overlap
