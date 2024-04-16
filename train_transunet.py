@@ -5,7 +5,7 @@ from torch.optim import SGD
 from utils.transunet import TransUNet
 from utils.utils import dice_loss
 from config import cfg
-
+from utils.metrics import *
 
 class TransUNetSeg:
     def __init__(self, device):
@@ -69,6 +69,5 @@ class TransUNetSeg:
         loss = self.criterion(pred_mask, params['mask'])
         
 
-        accuracy = self.pixelwise_accuracy(pred_mask, params['mask'])
 
-        return loss.item(), pred_mask , accuracy
+        return loss.item(), pred_mask
