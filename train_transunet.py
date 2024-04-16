@@ -39,11 +39,15 @@ class TransUNetSeg:
         loss.backward()
         self.optimizer.step()
 
-        # Compute accuracy
-        accuracy = self.pixelwise_accuracy(pred_mask, params['mask'])
+        # Compute metrics
+        IOU = intersection_over_union(pred_mask, params['mask'])
+        DSC = dice_similarity_coefficient(pred_mask, params['mask'])
+        acc = pixel_accuracy(pred_mask, params['mask'])
+        F1 = f1_score(pred_mask, params['mask'])
 
+        metrics = [IOU, DSC, acc, F1]
 
-        return loss.item(), pred_mask, accuracy
+        return loss.item(), pred_mask, metrics
 
     def pixelwise_accuracy(self, pred_mask, true_mask):
         # Flatten predicted and true masks

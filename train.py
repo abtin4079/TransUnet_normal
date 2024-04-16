@@ -45,14 +45,14 @@ class TrainTestPipe:
             img = img.to(self.device)
             mask = mask.to(self.device)
 
-            loss, cls_pred , accuracy = step_func(img=img, mask=mask)
+            loss, cls_pred , metrics = step_func(img=img, mask=mask)
 
 
             total_loss += loss
 
             t.update()
 
-        return total_loss , accuracy
+        return total_loss , metrics
 
     def train(self):
         # Load pre-trained model weights before starting training
@@ -77,16 +77,19 @@ class TrainTestPipe:
 
         for epoch in range(cfg.epoch):
             with tqdm(total=len(self.train_loader) + len(self.test_loader)) as t:
-                train_loss , _ , accuracy = self.__loop(self.train_loader, self.transunet.train_step, t)
+                train_loss ,  metrics = self.__loop(self.train_loader, self.transunet.train_step, t)
 
                 test_loss = self.__loop(self.test_loader, self.transunet.test_step, t)
 
             callback.epoch_end(epoch + 1,
                                {'loss': train_loss / len(self.train_loader),
-                                'test_loss': test_loss / len(self.test_loader), 
-                                "accuracy: ": accuracy})
+                                'test_loss': test_loss[0] / len(self.test_loader), 
+                                "IOU: ": metrics[0], 
+                                "DSC: ": metrics[1],
+                                "accuracy: ": metrics[2],
+                                "F1-score: ": metrics[3]})
 
-            train_loss_plot.append(train_loss / len(self.train_loader))
+            train_loss_plot.append(train_loss[0] / len(self.train_loader))
             test_loss_plot.append(test_loss / len(self.test_loader))
 
             # Plot the training and testing losses

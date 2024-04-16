@@ -1,5 +1,6 @@
 import torch
 
+
 def intersection_over_union(y_true, y_pred):
     intersection = torch.logical_and(y_true, y_pred).sum().float()
     union = torch.logical_or(y_true, y_pred).sum().float()
