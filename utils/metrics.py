@@ -1,49 +1,63 @@
 import torch
+from utils.utils import dice_loss
 
+def intersection_over_union(pred, target):
 
-def intersection_over_union(y_true, y_pred):
-    intersection = torch.logical_and(y_true, y_pred).sum().float()
-    union = torch.logical_or(y_true, y_pred).sum().float()
-    iou_score = intersection / union
-    return iou_score.item()
+    pred = torch.sigmoid(pred)
+    pred = pred.contiguous().view(-1)
+    target = target.contiguous().view(-1)
 
-def dice_similarity_coefficient(y_true, y_pred):
-    intersection = torch.sum(y_true * y_pred).float()
-    dice_coefficient = (2. * intersection) / (torch.sum(y_true) + torch.sum(y_pred))
-    return dice_coefficient.item()
+    intersection = torch.sum(pred * target)
+    union = torch.sum(pred) + torch.sum(target) - intersection
+    
+    iou_score = intersection / (union + 1e-5)
+    return iou_score
 
-def pixel_accuracy(y_true, y_pred):
-    correct_pixels = torch.sum(y_true == y_pred).float()
-    total_pixels = y_true.numel()
-    accuracy = correct_pixels / total_pixels
+def dice_similarity_coefficient(pred, target):
+    dice_score = dice_loss(pred, target)
+    return 1 - dice_score
+    
+
+def pixel_accuracy(pred, target):
+
+    correct_pixels = torch.sum(target == pred).float()
+    total_pixels = target.numel()
+
+    accuracy = (correct_pixels + 1e-5) / (total_pixels + 1e-5)
     return accuracy.item()
 
-def mean_pixel_accuracy(y_true, y_pred):
-    class_accuracy = []
-    for class_label in torch.unique(y_true):
-        true_mask = (y_true == class_label)
-        pred_mask = (y_pred == class_label)
-        class_accuracy.append(torch.sum(true_mask == pred_mask).float() / torch.sum(true_mask))
-    mean_accuracy = torch.mean(torch.stack(class_accuracy))
-    return mean_accuracy.item()
+def accuracy(pred, target, threshold=0.5):
+    pred = torch.sigmoid(pred)
+    
+    pred_binary = (pred > threshold).float()  # Convert probabilities to binary predictions
+    target_binary = target.float()
 
-def mean_intersection_over_union(y_true, y_pred):
-    class_iou = []
-    for class_label in torch.unique(y_true):
-        true_mask = (y_true == class_label)
-        pred_mask = (y_pred == class_label)
-        class_iou.append(intersection_over_union(true_mask, pred_mask))
-    mean_iou = torch.mean(torch.tensor(class_iou))
-    return mean_iou.item()
+    correct = torch.sum((pred_binary == target_binary).float())
+    total = target.numel()
 
-def f1_score(y_true, y_pred):
-    tp = torch.sum(y_true * y_pred).float()
-    fp = torch.sum((1 - y_true) * y_pred).float()
-    fn = torch.sum(y_true * (1 - y_pred)).float()
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * (precision * recall) / (precision + recall)
-    return f1.item()
+    accuracy = correct / total
+
+    return accuracy.item()
+
+
+def f1_score(pred, target, threshold=0.5):
+    pred = torch.sigmoid(pred)
+    
+    pred_binary = (pred > threshold).float()  # Convert probabilities to binary predictions
+    target_binary = target.float()
+
+    tp = torch.sum(pred_binary * target_binary)
+    fp = torch.sum((1 - target_binary) * pred_binary)
+    fn = torch.sum(target_binary * (1 - pred_binary))
+    
+    epsilon = 1e-5
+    precision = tp / (tp + fp + epsilon)
+    recall = tp / (tp + fn + epsilon)
+    
+    f1 = 2 * (precision * recall) / (precision + recall + epsilon)
+
+    return f1
+
 
 
 
@@ -57,6 +71,4 @@ if __name__ == '__main__':
     print("Intersection over Union:", intersection_over_union(y_true, y_pred))
     print("Dice Similarity Coefficient:", dice_similarity_coefficient(y_true, y_pred))
     print("Pixel Accuracy:", pixel_accuracy(y_true, y_pred))
-    print("Mean Pixel Accuracy:", mean_pixel_accuracy(y_true, y_pred))
-    print("Mean Intersection over Union:", mean_intersection_over_union(y_true, y_pred))
     print("F1 Score:", f1_score(y_true.flatten(), y_pred.flatten()))
