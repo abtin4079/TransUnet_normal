@@ -66,5 +66,4 @@ if __name__ == '__main__':
 
     print("Intersection over Union:", intersection_over_union(y_true, y_pred))
     print("Dice Similarity Coefficient:", dice_similarity_coefficient(y_true, y_pred))
-    print("Pixel Accuracy:", pixel_accuracy(y_true, y_pred))
     print("F1 Score:", f1_score(y_true.flatten(), y_pred.flatten()))
