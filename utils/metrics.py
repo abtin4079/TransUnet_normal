@@ -13,7 +13,7 @@ def intersection_over_union(pred, target):
     epsilon = 1e-5
     iou = intersection / (union + epsilon)
 
-    return 1 - iou
+    return iou.item()
 
 
 def dice_similarity_coefficient(pred, target):
@@ -21,14 +21,6 @@ def dice_similarity_coefficient(pred, target):
     DSC = 1 - dice_score
     return DSC.item()
     
-
-def pixel_accuracy(pred, target):
-
-    correct_pixels = torch.sum(target == pred).float()
-    total_pixels = target.numel()
-
-    accuracy = (correct_pixels + 1e-5) / (total_pixels + 1e-5)
-    return accuracy.item()
 
 def accuracy(pred, target, threshold=0.5):
     pred = torch.sigmoid(pred)

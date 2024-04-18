@@ -36,9 +36,7 @@ class TransUNetSeg:
         self.optimizer.zero_grad()
         pred_mask = self.model(params['img'])
         loss = self.criterion(pred_mask, params['mask'])
-        DSC = dice_similarity_coefficient(pred_mask, params['mask'])
         IOU = intersection_over_union(pred_mask, params['mask'])
-        Acc = pixel_accuracy(pred_mask, params['mask'])
         acc = accuracy(pred_mask, params['mask'])
         F1 = f1_score(pred_mask, params['mask'])
 

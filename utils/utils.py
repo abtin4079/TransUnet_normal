@@ -73,4 +73,3 @@ class EpochCallback:
                 self.end_training = True
 
         print('\n')
-        
