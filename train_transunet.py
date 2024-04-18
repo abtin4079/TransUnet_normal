@@ -43,9 +43,9 @@ class TransUNetSeg:
         F1 = f1_score(pred_mask, params['mask'])
 
         loss.backward()
-        DSC.backward()
-        IOU.backward()
-        F1.backward()
+        # DSC.backward()
+        # IOU.backward()
+        # F1.backward()
 
         self.optimizer.step()
 
@@ -54,7 +54,7 @@ class TransUNetSeg:
         
 
 
-        metrics = [IOU.item(), DSC.item() , Acc.item(), F1.item(), acc.item()]
+        metrics = [IOU, F1, acc]
 
         return loss.item(), pred_mask, metrics
 

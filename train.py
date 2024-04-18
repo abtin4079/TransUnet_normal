@@ -84,11 +84,10 @@ class TrainTestPipe:
             callback.epoch_end(epoch + 1,
                                {'train_loss': train_loss / len(self.train_loader),
                                 'test_loss': test_loss[0] / len(self.test_loader), 
-                                "IOU": metrics[0] / len(self.train_loader), 
-                                "DSC": metrics[1] / len(self.train_loader),
-                                "accuracy": metrics[2],
-                                "F1-score": metrics[3] / len(self.train_loader), 
-                                "acc_with_binary": metrics[4]})
+                                "IOU": metrics[0] , 
+                                "DSC": 1 -  train_loss / len(self.train_loader),
+                                "F1-score": metrics[1] , 
+                                "accuracy": metrics[2]})
 
             train_loss_plot.append(train_loss / len(self.train_loader))
             test_loss_plot.append(test_loss[0] / len(self.test_loader))

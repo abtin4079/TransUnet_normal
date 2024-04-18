@@ -2,20 +2,24 @@ import torch
 from utils.utils import dice_loss
 
 def intersection_over_union(pred, target):
-
     pred = torch.sigmoid(pred)
-    pred = pred.contiguous().view(-1)
-    target = target.contiguous().view(-1)
-
-    intersection = torch.sum(pred * target)
-    union = torch.sum(pred) + torch.sum(target) - intersection
     
-    iou_score = intersection / (union + 1e-5)
-    return iou_score
+    pred_binary = (pred > 0.5).float()  # Convert probabilities to binary predictions
+    target_binary = target.float()
+
+    intersection = torch.sum(pred_binary * target_binary)
+    union = torch.sum(pred_binary) + torch.sum(target_binary) - intersection
+
+    epsilon = 1e-5
+    iou = intersection / (union + epsilon)
+
+    return 1 - iou
+
 
 def dice_similarity_coefficient(pred, target):
     dice_score = dice_loss(pred, target)
-    return 1 - dice_score
+    DSC = 1 - dice_score
+    return DSC.item()
     
 
 def pixel_accuracy(pred, target):
@@ -56,7 +60,7 @@ def f1_score(pred, target, threshold=0.5):
     
     f1 = 2 * (precision * recall) / (precision + recall + epsilon)
 
-    return f1
+    return f1.item()
 
 
 
