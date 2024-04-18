@@ -36,32 +36,27 @@ class TransUNetSeg:
         self.optimizer.zero_grad()
         pred_mask = self.model(params['img'])
         loss = self.criterion(pred_mask, params['mask'])
+        DSC = dice_similarity_coefficient(pred_mask, params['mask'])
+        IOU = intersection_over_union(pred_mask, params['mask'])
+        Acc = pixel_accuracy(pred_mask, params['mask'])
+        acc = accuracy(pred_mask, params['mask'])
+        F1 = f1_score(pred_mask, params['mask'])
+
         loss.backward()
+        DSC.backward()
+        IOU.backward()
+        F1.backward()
+
         self.optimizer.step()
 
         # Compute metrics
-        IOU = intersection_over_union(pred_mask, params['mask'])
-        DSC = dice_similarity_coefficient(pred_mask, params['mask'])
-        acc = pixel_accuracy(pred_mask, params['mask'])
-        F1 = f1_score(pred_mask, params['mask'])
+        
+        
 
-        metrics = [IOU, DSC, acc, F1]
+
+        metrics = [IOU.item(), DSC.item() , Acc.item(), F1.item(), acc.item()]
 
         return loss.item(), pred_mask, metrics
-
-    def pixelwise_accuracy(self, pred_mask, true_mask):
-        # Flatten predicted and true masks
-        pred_flat = pred_mask.view(-1)
-        true_flat = true_mask.view(-1)
-
-        # Compute accuracy
-        correct = (pred_flat == true_flat).float().sum()
-        total_pixels = true_flat.numel()
-        accuracy = correct / total_pixels
-
-        return accuracy.item()   
-
-
 
 
 
