@@ -56,12 +56,12 @@ class TrainTestPipe:
 
     def train(self):
         # Load pre-trained model weights before starting training
-        if os.path.exists(self.model_path):
-            self.transunet.load_model(self.model_path)  
+        # if os.path.exists(self.model_path):
+        #     self.transunet.load_model(self.model_path)  
 
-        # Freeze the weights of the earlier layers, if desired
-        for param in self.transunet.model.parameters():
-            param.requires_grad = True
+        # # Freeze the weights of the earlier layers, if desired
+        # for param in self.transunet.model.parameters():
+        #     param.requires_grad = True
         # for param in self.transunet.model.fc.parameters():
         #     param.requires_grad = True    
 
@@ -71,7 +71,8 @@ class TrainTestPipe:
 
         train_loss_plot = []
         test_loss_plot = []
-        
+        train_acc_plot = []
+
         callback = EpochCallback(self.model_path, cfg.epoch,
                                  self.transunet.model, self.transunet.optimizer, 'test_loss', cfg.patience)
 
@@ -91,27 +92,31 @@ class TrainTestPipe:
 
             train_loss_plot.append(train_loss / len(self.train_loader))
             test_loss_plot.append(test_loss[0] / len(self.test_loader))
+            train_acc_plot.append(metrics[2])
 
             # Plot the training and testing losses
             plt.figure()  # Create a new figure to avoid overlap
             plt.plot(train_loss_plot, label='Train Loss')
-            plt.plot(test_loss_plot, label='Test Loss')
+            plt.plot(test_loss_plot, label='Validation Loss')
             plt.xlabel('Epochs')
             plt.ylabel('Loss')
             plt.legend()
     
             # Save the plot to the same file, overwriting the previous plot
-            plt.savefig('F:/UNIVERCITY/sharifian/t3/plot/plot.png')
+            plt.savefig('/content/drive/MyDrive/kvasir/plot/plot3.png')
             plt.close()  # Close the figure to free memory      
 
+
+            plt.figure()  # Create a new figure to avoid overlap
+            plt.plot(train_acc_plot, label='Accuracy')
+            plt.xlabel('Epochs')
+            plt.ylabel('acc')
+            plt.legend()
+    
+            # Save the plot to the same file, overwriting the previous plot
+            plt.savefig('/content/drive/MyDrive/kvasir/plot/plot4.png')
+            plt.close()  # Close the figure to free memory  
 
             if callback.end_training:
                 break
 
-        #plot the train loss and test loss
-        plt.plot(train_loss_plot, label=' Loss')
-        plt.plot(test_loss_plot, label='test Loss')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.show()
