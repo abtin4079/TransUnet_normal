@@ -39,14 +39,19 @@ class TrainTestPipe:
 
     def __loop(self, loader, step_func, t):
         total_loss = 0
+        metrics = [0.0000,0.0000,0.0000,0.0000,0.0000]
 
         for step, data in enumerate(loader):
             img, mask = data['img'], data['mask']
             img = img.to(self.device)
             mask = mask.to(self.device)
 
-            loss, cls_pred , metrics = step_func(img=img, mask=mask)
-
+            loss, cls_pred , metric = step_func(img=img, mask=mask)
+            metrics[0] = round(metrics[0] + metric[0], 4)
+            metrics[1] = round(metrics[1] + metric[1], 4)
+            metrics[2] = round(metrics[2] + metric[2], 4)
+            metrics[3] = round(metrics[3] + metric[3], 4)
+            metrics[4] = round(metrics[4] + metric[4], 4)
 
             total_loss += loss
 
@@ -69,9 +74,12 @@ class TrainTestPipe:
         # self.transunet.model.fc = nn.Linear(num_features, cfg.transunet.class_num)
 
 
-        train_loss_plot = []
-        test_loss_plot = []
-        train_acc_plot = []
+        # train_loss_plot = []
+        # train_loss_plot.append(1)
+        # test_loss_plot = []
+        # test_loss_plot.append(1)
+        # train_acc_plot = []
+        # train_acc_plot.append(0)
 
         callback = EpochCallback(self.model_path, cfg.epoch,
                                  self.transunet.model, self.transunet.optimizer, 'test_loss', cfg.patience)
@@ -85,37 +93,39 @@ class TrainTestPipe:
             callback.epoch_end(epoch + 1,
                                {'train_loss': train_loss / len(self.train_loader),
                                 'test_loss': test_loss[0] / len(self.test_loader), 
-                                "IOU": metrics[0] , 
+                                "IOU": metrics[0] / len(self.train_loader), 
                                 "DSC": 1 -  train_loss / len(self.train_loader),
-                                "F1-score": metrics[1] , 
-                                "accuracy": metrics[2]})
+                                "F1-score": metrics[1] / len(self.train_loader), 
+                                "accuracy": metrics[2] / len(self.train_loader), 
+                                "recall": metrics[3] / len(self.train_loader), 
+                                "precision": metrics[4] / len(self.train_loader)}) 
 
-            train_loss_plot.append(train_loss / len(self.train_loader))
-            test_loss_plot.append(test_loss[0] / len(self.test_loader))
-            train_acc_plot.append(metrics[2])
+            # train_loss_plot.append(train_loss / len(self.train_loader))
+            # test_loss_plot.append(test_loss[0] / len(self.test_loader))
+            # train_acc_plot.append(metrics[2])
 
-            # Plot the training and testing losses
-            plt.figure()  # Create a new figure to avoid overlap
-            plt.plot(train_loss_plot, label='Train Loss')
-            plt.plot(test_loss_plot, label='Validation Loss')
-            plt.xlabel('Epochs')
-            plt.ylabel('Loss')
-            plt.legend()
+            # # Plot the training and testing losses
+            # plt.figure()  # Create a new figure to avoid overlap
+            # plt.plot(train_loss_plot, label='Train Loss')
+            # plt.plot(test_loss_plot, label='Validation Loss')
+            # plt.xlabel('Epochs')
+            # plt.ylabel('Loss')
+            # plt.legend()
     
-            # Save the plot to the same file, overwriting the previous plot
-            plt.savefig('/content/drive/MyDrive/kvasir/plot/plot3.png')
-            plt.close()  # Close the figure to free memory      
+            # # Save the plot to the same file, overwriting the previous plot
+            # plt.savefig('/content/drive/MyDrive/kvasir/plot/plot3.png')
+            # plt.close()  # Close the figure to free memory      
 
 
-            plt.figure()  # Create a new figure to avoid overlap
-            plt.plot(train_acc_plot, label='Accuracy')
-            plt.xlabel('Epochs')
-            plt.ylabel('acc')
-            plt.legend()
+            # plt.figure()  # Create a new figure to avoid overlap
+            # plt.plot(train_acc_plot, label='Accuracy')
+            # plt.xlabel('Epochs')
+            # plt.ylabel('acc')
+            # plt.legend()
     
-            # Save the plot to the same file, overwriting the previous plot
-            plt.savefig('/content/drive/MyDrive/kvasir/plot/plot4.png')
-            plt.close()  # Close the figure to free memory  
+            # # Save the plot to the same file, overwriting the previous plot
+            # plt.savefig('/content/drive/MyDrive/kvasir/plot/plot4.png')
+            # plt.close()  # Close the figure to free memory  
 
             if callback.end_training:
                 break

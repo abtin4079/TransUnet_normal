@@ -52,8 +52,7 @@ def f1_score(pred, target, threshold=0.5):
     
     f1 = 2 * (precision * recall) / (precision + recall + epsilon)
 
-    return f1.item()
-
+    return f1.item(), recall.item(), precision.item()
 
 
 
