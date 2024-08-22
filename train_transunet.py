@@ -39,23 +39,15 @@ class TransUNetSeg:
         loss = self.criterion(pred_mask, params['mask'])
         IOU = intersection_over_union(pred_mask, params['mask'])
         acc = accuracy(pred_mask, params['mask'])
-        F1 = f1_score(pred_mask, params['mask'])
+        F1, recall, precision = f1_score(pred_mask, params['mask'])
 
         loss.backward()
-        # DSC.backward()
-        # IOU.backward()
-        # F1.backward()
 
         self.optimizer.step()
 
-        # Compute metrics
+        metrics = [IOU , F1 , acc, recall, precision]
         
-        
-
-
-        metrics = [IOU, F1, acc]
-
-        return loss.item(), pred_mask, metrics
+        return loss.item(), pred_mask , metrics
 
 
 
@@ -65,8 +57,10 @@ class TransUNetSeg:
 
         pred_mask = self.model(params['img'])
         loss = self.criterion(pred_mask, params['mask'])
-        
-        a = 0
+        IOU = intersection_over_union(pred_mask, params['mask'])
+        acc = accuracy(pred_mask, params['mask'])
+        F1, recall, precision = f1_score(pred_mask, params['mask'])
 
+        metrics = [IOU , F1 , acc, recall, precision]
 
-        return loss.item(), pred_mask , a
+        return loss.item(), pred_mask , metrics
